@@ -43,6 +43,93 @@ Building a **Scalable Multi-User AR Holographic Terrain Simulation System** for 
   - Data: Production database tuning + backup strategies
   - Integration: Real-world testing + training scenarios
 
+## 🏗️ **Complete System Architecture**
+
+```mermaid
+graph TB
+    %% External Data Sources
+    EXT_THREAT[Threat Intelligence] --> CLEAN
+    EXT_WEATHER[Weather/Satellite Data] --> CLEAN
+    EXT_MAPS[Geospatial Data] --> CLEAN
+    EXT_ALLIES[Allied Systems] --> CLEAN
+    
+    %% Security Layer
+    CLEAN[Cleaner/Security Buffer<br/>- Malware Scanning<br/>- Data Validation<br/>- Rate Limiting] --> SM
+    
+    %% Client Layer
+    AR1[AR Client 1<br/>Unity App] --> LB
+    AR2[AR Client 2<br/>Unity App] --> LB
+    AR3[AR Client N<br/>Unity App] --> LB
+    LB[Load Balancer<br/>- Traffic Distribution<br/>- Health Checks<br/>- Auto-scaling] --> SM
+    
+    %% Session Management
+    SM[Session Manager<br/>- Multi-user Coordination<br/>- State Synchronization<br/>- Connection Management] --> SP
+    SM --> AI_PROC
+    SM --> KG_PROC
+    
+    %% Processing Layer
+    SP[Spatial Processor<br/>- SLAM Processing<br/>- Coordinate Sync<br/>- Drift Correction] --> SS
+    AI_PROC[AI Tactical Processor<br/>- Threat Analysis<br/>- Pathfinding<br/>- Strategic Recommendations] --> TS
+    KG_PROC[Knowledge Graph Processor<br/>- SPARQL Queries<br/>- Graph Updates<br/>- Relationship Traversal] --> GS
+    
+    %% Streaming Layer
+    SS[Spatial Streamer<br/>- Delta Updates<br/>- Position Sync<br/>- Predictive Loading] --> AR1
+    SS --> AR2
+    SS --> AR3
+    TS[Tactical Streamer<br/>- AI Overlays<br/>- Semantic Compression<br/>- Priority Ranking] --> AR1
+    TS --> AR2  
+    TS --> AR3
+    GS[Graph Streamer<br/>- Real-time Graph Updates<br/>- Incremental Visualization<br/>- Change Notifications] --> AR1
+    GS --> AR2
+    GS --> AR3
+    
+    %% Database Queriers (Protection Layer)
+    SS --> SQ[Spatial DB Querier<br/>- Query Optimization<br/>- Connection Pooling<br/>- Load Protection]
+    TS --> AQ[Analytics DB Querier<br/>- AI Model Data<br/>- Performance Metrics<br/>- Usage Analytics]
+    GS --> GQ[Graph DB Querier<br/>- Neo4j Interface<br/>- Query Caching<br/>- Relationship Queries]
+    
+    %% Database Layer
+    SQ --> REDIS[(Redis Spatial Cache<br/>- Real-time Positions<br/>- Session State<br/>- Spatial Anchors)]
+    AQ --> TSDB[(Time-Series DB<br/>- Performance Metrics<br/>- AI Training Data<br/>- User Analytics)]
+    GQ --> NEO[(Neo4j Graph DB<br/>- Military Knowledge<br/>- Command Hierarchy<br/>- Equipment Relations)]
+    
+    %% Client Internal Architecture
+    subgraph "AR Client Internal Architecture"
+        INPUT[Multi-Modal Input<br/>Voice + Gaze + Gesture] --> FUSION[Input Fusion Engine]
+        FUSION --> APP_CORE[Application Core]
+        APP_CORE --> AR_MGR[AR Manager<br/>SLAM + Anchoring]
+        APP_CORE --> NET_CLIENT[Network Client<br/>Authentication + Streaming]
+        APP_CORE --> RENDER[Rendering Pipeline<br/>LOD + Culling + Shaders]
+        APP_CORE --> DATA_MGR[Data Manager<br/>Caching + Sync + Offline]
+        
+        %% Performance Management
+        PERF_MGR[Performance Manager] --> RENDER
+        PERF_MGR --> DATA_MGR
+        PERF_MGR --> NET_CLIENT
+        BAT_MON[Battery Monitor] --> PERF_MGR
+        THERM_MON[Thermal Monitor] --> PERF_MGR
+    end
+    
+    %% Client-Server Communication Protocols
+    NET_CLIENT -.->|WebRTC/gRPC| LB
+    NET_CLIENT -.->|Delta Streams| SS
+    NET_CLIENT -.->|AI Overlays| TS  
+    NET_CLIENT -.->|Graph Updates| GS
+    
+    %% Critical Integration Points
+    classDef criticalIntegration fill:#ff9999,stroke:#ff0000,stroke-width:3px
+    classDef clientComponent fill:#99ccff,stroke:#0066cc,stroke-width:2px
+    classDef serverComponent fill:#99ff99,stroke:#00cc00,stroke-width:2px
+    classDef dataComponent fill:#ffcc99,stroke:#ff6600,stroke-width:2px
+    classDef securityComponent fill:#ff99ff,stroke:#cc00cc,stroke-width:2px
+    
+    class SM,LB,SP,AI_PROC,KG_PROC criticalIntegration
+    class AR1,AR2,AR3,INPUT,FUSION,APP_CORE,AR_MGR,NET_CLIENT,RENDER,DATA_MGR,PERF_MGR clientComponent
+    class SS,TS,GS,SQ,AQ,GQ serverComponent
+    class REDIS,TSDB,NEO dataComponent
+    class CLEAN securityComponent
+```
+
 ## 🔄 Critical Dependencies
 
 ```mermaid
