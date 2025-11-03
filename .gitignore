@@ -1,0 +1,27 @@
+# Unity - Only ignore generated/cache folders, NOT the actual project
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Gradle cache (Android builds)
+.gradle/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+*.apk
+*.aab
