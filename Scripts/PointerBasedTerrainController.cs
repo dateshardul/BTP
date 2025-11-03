@@ -20,6 +20,7 @@ public class PointerBasedTerrainController : NetworkBehaviour
     [SerializeField] private TeacherControlMode teacherControl;
     [SerializeField] private Transform terrainTransform;
     [SerializeField] private AnnotationSystem annotationSystem;
+    [SerializeField] private SurfaceAnchorManager surfaceAnchor;
 
     [Header("Controller Settings")]
     [SerializeField] private XRNode controllerNode = XRNode.RightHand;  // Meta Quest 3 right controller
@@ -41,6 +42,10 @@ public class PointerBasedTerrainController : NetworkBehaviour
     [SerializeField] private float triggerThreshold = 0.1f;
     [SerializeField] private float gripThreshold = 0.1f;
 
+    [Header("Reanchoring")]
+    [SerializeField] private float reanchorHoldDuration = 1.5f;  // Hold time to trigger reanchor
+    [SerializeField] private LayerMask surfaceLayer;  // Layer for surface detection
+
     // Current state
     private InputDevice controller;
     private Vector3 lastHitPoint;
@@ -59,6 +64,10 @@ public class PointerBasedTerrainController : NetworkBehaviour
     private Vector2 thumbstick;
     private float triggerValue = 0f;
     private float gripValue = 0f;
+
+    // Reanchoring state
+    private float reanchorHoldTime = 0f;
+    private bool isReanchoring = false;
 
     private void Start()
     {
@@ -209,21 +218,38 @@ public class PointerBasedTerrainController : NetworkBehaviour
     /// </summary>
     private void HandleTerrainControl()
     {
-        if (!lastHitValid) return;
+        // REANCHORING - Hold Grip + A + B buttons for 1.5 seconds
+        // Point at any surface (table, floor, desk) to reanchor terrain there
+        if (gripPressed && buttonAPressed && buttonBPressed)
+        {
+            reanchorHoldTime += Time.deltaTime;
 
-        // BUTTON A - Place Marker (instant action)
-        if (buttonAPressed && !lastButtonAState)
+            if (reanchorHoldTime >= reanchorHoldDuration)
+            {
+                TriggerReanchor();
+                reanchorHoldTime = 0f;
+            }
+        }
+        else
+        {
+            reanchorHoldTime = 0f;
+        }
+
+        if (!lastHitValid && !isReanchoring) return;
+
+        // BUTTON A (alone) - Place Marker (instant action)
+        if (buttonAPressed && !buttonBPressed && !gripPressed && !lastButtonAState)
         {
             PlaceMarkerAtPointer();
         }
-        lastButtonAState = buttonAPressed;
+        lastButtonAState = buttonAPressed && !buttonBPressed && !gripPressed;
 
-        // BUTTON B - Remove Last Marker (undo)
-        if (buttonBPressed && !lastButtonBState)
+        // BUTTON B (alone) - Remove Last Marker (undo)
+        if (buttonBPressed && !buttonAPressed && !gripPressed && !lastButtonBState)
         {
             RemoveLastMarker();
         }
-        lastButtonBState = buttonBPressed;
+        lastButtonBState = buttonBPressed && !buttonAPressed && !gripPressed;
 
         // GRIP + MOVE - Pan Terrain
         if (gripPressed)
@@ -408,6 +434,14 @@ public class PointerBasedTerrainController : NetworkBehaviour
     /// </summary>
     private Color GetPointerColor()
     {
+        // Reanchor mode takes priority - show progress color
+        if (gripPressed && buttonAPressed && buttonBPressed)
+        {
+            // Fade from white to magenta as hold progresses
+            float progress = reanchorHoldTime / reanchorHoldDuration;
+            return Color.Lerp(Color.white, Color.magenta, progress);
+        }
+
         // Color based on what's being pressed
         if (buttonAPressed) return Color.red;      // Annotate mode
         if (gripPressed) return Color.green;       // Pan mode
@@ -429,12 +463,75 @@ public class PointerBasedTerrainController : NetworkBehaviour
         return GetPointerColor();
     }
 
+    /// <summary>
+    /// Reanchor terrain to surface where controller is pointing
+    /// Triggered by holding Grip + A + B for 1.5 seconds
+    /// </summary>
+    private void TriggerReanchor()
+    {
+        if (surfaceAnchor == null)
+        {
+            Debug.LogWarning("SurfaceAnchorManager not assigned. Cannot reanchor.");
+            return;
+        }
+
+        // Get controller ray
+        Vector3 controllerPos;
+        Quaternion controllerRot;
+        controller.TryGetFeatureValue(CommonUsages.devicePosition, out controllerPos);
+        controller.TryGetFeatureValue(CommonUsages.deviceRotation, out controllerRot);
+
+        Vector3 rayDirection = controllerRot * Vector3.forward;
+
+        // Raycast to find surface (not just terrain, but any surface)
+        Ray ray = new Ray(controllerPos, rayDirection);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, pointerLength, surfaceLayer))
+        {
+            // Found surface! Reanchor terrain there
+            surfaceAnchor.AnchorToPointServerRpc(hit.point, hit.normal);
+
+            Debug.Log($"Terrain reanchored to surface at {hit.point}");
+
+            // Strong haptic feedback
+            TriggerHapticFeedback(0.8f, 0.3f);
+
+            isReanchoring = true;
+        }
+        else
+        {
+            Debug.LogWarning("No surface detected at controller ray. Point at table/floor/surface.");
+
+            // Error haptic (short pulses)
+            TriggerHapticFeedback(0.3f, 0.05f);
+        }
+    }
+
+    /// <summary>
+    /// Public method to trigger reanchor (can be called from UI button)
+    /// </summary>
+    public void ReanchorToControllerRay()
+    {
+        TriggerReanchor();
+    }
+
+    /// <summary>
+    /// Get reanchor progress (0-1) for UI visualization
+    /// </summary>
+    public float GetReanchorProgress()
+    {
+        return Mathf.Clamp01(reanchorHoldTime / reanchorHoldDuration);
+    }
+
     // Public getters
     public bool IsGripping => gripPressed;
     public bool IsTriggering => triggerPressed;
     public bool IsZooming => triggerPressed && Mathf.Abs(thumbstick.x) <= thumbstickDeadzone;
     public bool IsRotating => triggerPressed && Mathf.Abs(thumbstick.x) > thumbstickDeadzone;
     public bool IsPanning => gripPressed;
+    public bool IsReanchoring => gripPressed && buttonAPressed && buttonBPressed;
+    public float ReanchorProgress => GetReanchorProgress();
     public Vector3 LastHitPoint => lastHitPoint;
     public bool PointerHittingTerrain => lastHitValid;
 }

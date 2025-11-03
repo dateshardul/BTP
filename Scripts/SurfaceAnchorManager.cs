@@ -12,9 +12,10 @@ public class SurfaceAnchorManager : NetworkBehaviour
     [SerializeField] private Transform terrainTransform;
 
     [Header("Anchor Settings")]
-    [SerializeField] private bool autoAnchorOnStart = false;
+    [SerializeField] private bool autoAnchorOnStart = true;  // Auto-anchor to nearest table on start
+    [SerializeField] private bool askTeacherFirst = false;   // If true, wait for teacher confirmation
     [SerializeField] private float anchorHeight = 0.05f;  // Height above surface (5cm)
-    [SerializeField] private bool alignToSurfaceNormal = true;
+    [SerializeField] private bool alignToSurfaceNormal = false;  // Keep horizontal for teaching
 
     [Header("Surface Detection")]
     [SerializeField] private LayerMask surfaceLayer;

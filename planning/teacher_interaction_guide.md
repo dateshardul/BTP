@@ -41,6 +41,7 @@
 | **Pan Terrain** | Grip + Move controller | Green | Slide terrain on surface |
 | **Zoom Terrain** | Trigger + Move controller | Blue | Closer=zoom in, farther=zoom out |
 | **Rotate Terrain** | Trigger + Thumbstick ←→ | Yellow | Spin around pointer point |
+| **Reanchor** | Hold Grip + A + B (1.5s) | White→Magenta | Move terrain to different surface |
 
 ---
 
@@ -281,23 +282,75 @@ The system automatically switches:
 
 ---
 
-## 🏗️ Surface Anchoring
+## 🏗️ Surface Anchoring & Reanchoring
 
-### Automatic Detection:
-- Uses Meta Quest's Scene Understanding
-- Detects tables, desks, floors automatically
-- Anchors terrain to nearest horizontal surface
-- Terrain hovers 5cm above surface
+### Initial Automatic Anchoring:
 
-### Supported Surfaces:
-- Tables / Desks / Countertops
-- Floor (fallback)
+**When app starts:**
+1. Meta Quest 3 scans for surfaces (tables, floor, desks)
+2. Finds nearest horizontal surface
+3. **Automatically anchors terrain** to that surface (5cm above)
+4. Terrain appears on table immediately
+
+**Supported Surfaces:**
+- Tables / Desks / Countertops (0.3m - 5m size)
+- Floor (always available as fallback)
 - Any flat horizontal surface (>80° from vertical)
 
-### Behavior:
-- All panning constrained to surface plane
-- Rotation always around vertical axis
-- Maintains position relative to physical table
+**Detection time:** <1 second (uses cached room scan)
+
+---
+
+### Manual Reanchoring (Move Terrain to Different Surface):
+
+Teachers can move terrain to a different table/location:
+
+#### **Method 1: Controller Combo** (Always Available)
+
+**Control:** Hold **Grip + A + B** buttons for 1.5 seconds
+
+**How to Use:**
+1. Point controller at desired surface (different table, floor spot, etc.)
+2. **Hold Grip + Button A + Button B** simultaneously
+3. Watch pointer ray fade **white → magenta** (shows progress)
+4. **When fully magenta** (1.5 sec), terrain moves to pointed location
+5. Strong haptic vibration confirms
+
+**Visual Feedback:**
+- Pointer ray changes: White → Magenta (progress indicator)
+- Progress bar shows in UI (if enabled)
+- Haptic pulse when complete
+
+**Use Cases:**
+- Move from small table to larger table
+- Move from table to floor
+- Reposition for better viewing
+- Move between rooms
+
+---
+
+#### **Method 2: UI Button** (If enabled)
+
+**Control:** Click "Reanchor Terrain" button in UI
+
+**How to Use:**
+1. Click **"Reanchor Terrain"** button (teacher UI panel)
+2. UI shows: "Point at surface and press Trigger"
+3. Point controller at desired surface
+4. Press **Trigger**
+5. Terrain moves there
+
+**Easier for beginners but requires UI interaction**
+
+---
+
+### Anchoring Behavior:
+
+**After anchoring:**
+- Terrain stays 5cm above surface
+- All panning constrained to that surface plane
+- Rotation always around vertical axis (perpendicular to surface)
+- Maintains relative position to physical table
 
 ---
 
