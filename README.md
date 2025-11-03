@@ -11,16 +11,18 @@ A collaborative mixed reality application for Meta Quest that allows multiple us
 
 This system enables multiple users in a shared VR/MR space to:
 - View the same terrain model simultaneously
-- Zoom, pan, and rotate the terrain collaboratively
-- See visual indicators of what other users are doing
-- Use both hand tracking (pinch gestures) and controllers
+- Teacher controls terrain (zoom, pan, rotate, annotate)
+- Students view in real-time
+- Use VR controllers, hand tracking, OR keyboard/mouse
 
 **Key Features:**
+- Teacher-student role-based access control
 - Multi-user synchronization via Unity Netcode
-- Gesture-based interaction (pinch, grab, rotate)
-- Authority management (prevents conflicts)
-- Visual feedback system
-- Automatic player spawn positioning
+- Three input methods: Controller, Hand Gestures, Keyboard/Mouse
+- Pointer-based manipulation (all ops centered on cursor/ray)
+- Google Maps-style annotation markers
+- Automatic table surface anchoring
+- Table edge occlusion (MR depth-based)
 
 ---
 
@@ -28,21 +30,36 @@ This system enables multiple users in a shared VR/MR space to:
 
 ```
 BTP v1/
-├── Scripts/                          # All C# scripts (7 files)
-│   ├── TerrainInteractionManager.cs # Core terrain manipulation & networking
-│   ├── TerrainInputHandler.cs       # XR input handling (controllers + hands)
-│   ├── UserActionIndicator.cs       # Visual feedback for user actions
-│   ├── NetworkConnectionManager.cs  # Host/Client connection management
-│   ├── ConnectionUI.cs              # UI for network connection
-│   ├── PlayerSpawnManager.cs        # Spawn players around terrain
-│   └── TerrainNetworkSetup.cs       # Auto-connect components helper
+├── Scripts/                          # All C# scripts (15 files)
+│   ├── Core Terrain (3):
+│   │   ├── TerrainInteractionManager.cs
+│   │   ├── TerrainInputHandler.cs
+│   │   └── UserActionIndicator.cs
+│   ├── Networking (4):
+│   │   ├── NetworkConnectionManager.cs
+│   │   ├── ConnectionUI.cs
+│   │   ├── PlayerSpawnManager.cs
+│   │   └── TerrainNetworkSetup.cs
+│   └── Teacher Controls (8):
+│       ├── TeacherControlMode.cs
+│       ├── PointerBasedTerrainController.cs (Quest controller)
+│       ├── HandGestureTerrainController.cs (hand tracking)
+│       ├── KeyboardMouseTerrainController.cs (desktop/testing)
+│       ├── SurfaceAnchorManager.cs
+│       ├── AnnotationSystem.cs
+│       ├── MarkerPin.cs
+│       └── TerrainBoundsManager.cs
 │
-└── planning/                         # Documentation & guides
-    ├── multi_user_terrain_interaction_plan.md  # Original implementation plan
+└── planning/                         # Documentation & guides (10 files)
+    ├── unity_project_setup.md        # ★ START HERE - Beginner guide
+    ├── teacher_interaction_guide.md  # Controller + hand controls
+    ├── keyboard_mouse_controls.md    # Desktop/testing controls
+    ├── table_occlusion_setup.md      # Table edge clipping
+    ├── implementation_memo.md        # Technical reference
     ├── status_report.md              # Progress tracking
-    ├── implementation_memo.md        # Technical notes & quick reference
-    ├── unity_project_setup.md        # Comprehensive Unity setup guide
-    └── quick_start_guide.md          # Step-by-step getting started
+    ├── quick_start_guide.md          # 30-45 min tutorial
+    ├── IMPLEMENTATION_COMPLETE_SUMMARY.md
+    └── multi_user_terrain_interaction_plan.md
 
 ```
 
@@ -205,10 +222,29 @@ Terrain Transform Updated
 - Authority automatically released when user lets go
 - Visual indicators show who has control
 
-### Input Methods
-- **Controllers:** Grip button to grab, trigger to zoom
-- **Hand Tracking:** Pinch gesture to interact
-- Both methods work simultaneously
+### Input Methods (3 Options)
+
+**Meta Quest Controller:**
+- Button A: Place marker
+- Button B: Undo marker
+- Grip + Move: Pan
+- Trigger + Move: Zoom
+- Trigger + Thumbstick: Rotate
+
+**Hand Gestures:**
+- Single pinch + move: Pan
+- Two-hand pinch spread: Zoom
+- Two-hand twist: Rotate
+- Point + dwell: Annotate
+
+**Keyboard & Mouse (Desktop/Testing):**
+- Left Click + Drag: Pan
+- Right Click + Drag: Rotate
+- Mouse Wheel: Zoom
+- Middle Click: Place marker
+- Ctrl+Z: Undo
+
+All methods work with the same network architecture!
 
 ---
 
