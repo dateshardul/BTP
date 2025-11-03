@@ -1,3 +1,6 @@
+# Claude Code
+.claude/
+
 # Unity - Only ignore generated/cache folders, NOT the actual project
 [Ll]ibrary/
 [Tt]emp/
