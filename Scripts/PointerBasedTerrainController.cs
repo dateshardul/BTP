@@ -4,14 +4,16 @@ using Unity.Netcode;
 using System.Collections.Generic;
 
 /// <summary>
-/// Improved pointer-based terrain control for Meta Quest 3 controller
-/// IMPROVED UX Controls:
-/// - Button A: Place marker (instant)
-/// - Button B: Remove last marker (undo)
-/// - Grip + Move Controller: Pan terrain
-/// - Index Trigger + Move Controller: Zoom (closer=zoom in, farther=zoom out)
-/// - Index Trigger + Thumbstick Left/Right: Rotate around pointer
+/// Ergonomic pointer-based terrain control for Meta Quest 3 controller
+/// REDESIGNED UX (Trigger-based):
+/// - Button A (alone): Place marker (instant)
+/// - Button B (alone): Undo marker
+/// - Trigger + Move: Zoom (push=in, pull=out)
+/// - Trigger + Grip + Move: Pan terrain
+/// - Trigger + Thumbstick ←→: Rotate around pointer
+/// - Trigger + Button B (hold 2s): Reanchor to different surface
 /// All operations use the point where the controller ray hits the terrain
+/// Pointer ray always visible to students when teacher is pointing
 /// </summary>
 public class PointerBasedTerrainController : NetworkBehaviour
 {
@@ -218,59 +220,60 @@ public class PointerBasedTerrainController : NetworkBehaviour
     /// </summary>
     private void HandleTerrainControl()
     {
-        // REANCHORING - Hold Grip + A + B buttons for 1.5 seconds
-        // Point at any surface (table, floor, desk) to reanchor terrain there
-        if (gripPressed && buttonAPressed && buttonBPressed)
+        // BUTTON A (alone) - Place Marker (instant action)
+        if (buttonAPressed && !triggerPressed && !lastButtonAState)
         {
-            reanchorHoldTime += Time.deltaTime;
+            PlaceMarkerAtPointer();
+        }
+        lastButtonAState = buttonAPressed && !triggerPressed;
 
-            if (reanchorHoldTime >= reanchorHoldDuration)
+        // BUTTON B (alone) - Remove Last Marker (undo)
+        if (buttonBPressed && !triggerPressed && !lastButtonBState)
+        {
+            RemoveLastMarker();
+        }
+        lastButtonBState = buttonBPressed && !triggerPressed;
+
+        // === TRIGGER-BASED CONTROLS (Trigger is always the base) ===
+
+        if (triggerPressed)
+        {
+            // TRIGGER + BUTTON B (hold 2s) - Reanchor to new surface
+            if (buttonBPressed)
             {
-                TriggerReanchor();
+                reanchorHoldTime += Time.deltaTime;
+
+                if (reanchorHoldTime >= reanchorHoldDuration)
+                {
+                    TriggerReanchor();
+                    reanchorHoldTime = 0f;
+                }
+            }
+            else
+            {
                 reanchorHoldTime = 0f;
+
+                // Check what else is pressed with trigger
+                if (gripPressed)
+                {
+                    // TRIGGER + GRIP + MOVE - Pan
+                    HandlePan();
+                }
+                else if (Mathf.Abs(thumbstick.x) > thumbstickDeadzone)
+                {
+                    // TRIGGER + THUMBSTICK - Rotate
+                    HandleRotateWithThumbstick();
+                }
+                else
+                {
+                    // TRIGGER + MOVE (only) - Zoom
+                    HandleZoom();
+                }
             }
         }
         else
         {
             reanchorHoldTime = 0f;
-        }
-
-        if (!lastHitValid && !isReanchoring) return;
-
-        // BUTTON A (alone) - Place Marker (instant action)
-        if (buttonAPressed && !buttonBPressed && !gripPressed && !lastButtonAState)
-        {
-            PlaceMarkerAtPointer();
-        }
-        lastButtonAState = buttonAPressed && !buttonBPressed && !gripPressed;
-
-        // BUTTON B (alone) - Remove Last Marker (undo)
-        if (buttonBPressed && !buttonAPressed && !gripPressed && !lastButtonBState)
-        {
-            RemoveLastMarker();
-        }
-        lastButtonBState = buttonBPressed && !buttonAPressed && !gripPressed;
-
-        // GRIP + MOVE - Pan Terrain
-        if (gripPressed)
-        {
-            HandlePan();
-        }
-
-        // INDEX TRIGGER + MOVE - Zoom
-        // INDEX TRIGGER + THUMBSTICK - Rotate
-        if (triggerPressed)
-        {
-            // Check if using thumbstick for rotation
-            if (Mathf.Abs(thumbstick.x) > thumbstickDeadzone)
-            {
-                HandleRotateWithThumbstick();
-            }
-            else
-            {
-                // No thumbstick, use trigger for zoom
-                HandleZoom();
-            }
         }
 
         // Update last positions for delta calculations
@@ -434,25 +437,30 @@ public class PointerBasedTerrainController : NetworkBehaviour
     /// </summary>
     private Color GetPointerColor()
     {
-        // Reanchor mode takes priority - show progress color
-        if (gripPressed && buttonAPressed && buttonBPressed)
+        // Trigger + Button B (reanchor mode) - show progress
+        if (triggerPressed && buttonBPressed)
         {
             // Fade from white to magenta as hold progresses
             float progress = reanchorHoldTime / reanchorHoldDuration;
             return Color.Lerp(Color.white, Color.magenta, progress);
         }
 
-        // Color based on what's being pressed
-        if (buttonAPressed) return Color.red;      // Annotate mode
-        if (gripPressed) return Color.green;       // Pan mode
+        // Trigger-based controls (Trigger is active)
         if (triggerPressed)
         {
-            if (Mathf.Abs(thumbstick.x) > thumbstickDeadzone)
-                return Color.yellow;  // Rotate mode
+            if (gripPressed)
+                return Color.green;  // Trigger + Grip = Pan
+            else if (Mathf.Abs(thumbstick.x) > thumbstickDeadzone)
+                return Color.yellow;  // Trigger + Thumbstick = Rotate
             else
-                return Color.blue;    // Zoom mode
+                return Color.blue;    // Trigger + Move = Zoom
         }
-        return Color.cyan;  // Idle
+
+        // Standalone buttons (no trigger)
+        if (buttonAPressed) return Color.red;      // Place marker
+
+        // Idle - pointer visible but not manipulating
+        return Color.cyan;
     }
 
     /// <summary>
@@ -527,11 +535,12 @@ public class PointerBasedTerrainController : NetworkBehaviour
     // Public getters
     public bool IsGripping => gripPressed;
     public bool IsTriggering => triggerPressed;
-    public bool IsZooming => triggerPressed && Mathf.Abs(thumbstick.x) <= thumbstickDeadzone;
+    public bool IsZooming => triggerPressed && !gripPressed && Mathf.Abs(thumbstick.x) <= thumbstickDeadzone;
+    public bool IsPanning => triggerPressed && gripPressed;
     public bool IsRotating => triggerPressed && Mathf.Abs(thumbstick.x) > thumbstickDeadzone;
-    public bool IsPanning => gripPressed;
-    public bool IsReanchoring => gripPressed && buttonAPressed && buttonBPressed;
+    public bool IsReanchoring => triggerPressed && buttonBPressed;
     public float ReanchorProgress => GetReanchorProgress();
     public Vector3 LastHitPoint => lastHitPoint;
     public bool PointerHittingTerrain => lastHitValid;
+    public bool IsPointerActive => true;  // Always show pointer when teacher role
 }

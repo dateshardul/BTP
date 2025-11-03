@@ -32,20 +32,41 @@
 └─────────────────────────────────────┘
 ```
 
-### Control Summary:
+### REDESIGNED Control Summary (Ergonomic - Trigger-Based):
 
 | Action | Control | Pointer Color | Description |
 |--------|---------|---------------|-------------|
-| **Place Marker** | Button A (single press) | Red | Instantly place pin at pointer |
-| **Undo Marker** | Button B (single press) | Red | Remove last placed marker |
-| **Pan Terrain** | Grip + Move controller | Green | Slide terrain on surface |
-| **Zoom Terrain** | Trigger + Move controller | Blue | Closer=zoom in, farther=zoom out |
-| **Rotate Terrain** | Trigger + Thumbstick ←→ | Yellow | Spin around pointer point |
-| **Reanchor** | Hold Grip + A + B (1.5s) | White→Magenta | Move terrain to different surface |
+| **Place Marker** | Button A (alone) | Red | Instantly place pin at pointer |
+| **Undo Marker** | Button B (alone) | - | Remove last placed marker |
+| **Zoom** | Trigger + Move | Blue | Push=zoom in, Pull=zoom out |
+| **Pan** | Trigger + Grip + Move | Green | Drag terrain on surface |
+| **Rotate** | Trigger + Thumbstick ←→ | Yellow | Spin around pointer point |
+| **Reanchor** | Trigger + Button B (hold 2s) | White→Magenta | Move to different surface |
+| **Show Pointer** | Just point controller | Cyan | Students see where you point |
+
+**Key Change:** Index Trigger is now the base modifier for all terrain manipulation!
 
 ---
 
-## 🎯 How Each Control Works
+## 🎯 How Each Control Works (REDESIGNED - Ergonomic)
+
+### 0. Show Pointer to Students (Cyan Ray) - **Just Point**
+
+**Purpose:** Show students where you're looking/pointing without manipulating
+
+**How to Use:**
+1. Simply point controller at terrain
+2. Cyan ray appears
+3. All students see where you're pointing
+4. Hit indicator shows exact spot
+
+**Use for:**
+- "Look at this mountain here" (point)
+- Drawing attention before annotation
+- Indicating areas of interest
+- Non-verbal communication
+
+---
 
 ### 1. Zoom (Blue Pointer) - **Trigger + Move**
 
@@ -53,38 +74,30 @@
 
 **How to Use:**
 1. Point controller at desired zoom center on terrain
-2. **Hold Index Trigger**
+2. **Hold Index Trigger** (only trigger, nothing else)
 3. **Move controller** toward/away from terrain:
    - **Move CLOSER** → Zoom IN (terrain gets bigger)
    - **Move FARTHER** → Zoom OUT (terrain gets smaller)
 4. Release trigger to stop zooming
 
-**Key Features:**
-- Zoom centers on pointer hit point (not terrain center!)
-- Natural push-pull motion
-- Limits: 0.5x (min) to 3.0x (max) scale
-
-**UX Benefit:** Feels like physically pushing/pulling the terrain
+**Fingers Used:** Index only
+**Ergonomics:** ⭐⭐⭐⭐⭐ Perfect - natural trigger pull
 
 ---
 
-### 2. Pan (Green Pointer) - **Grip + Move**
+### 2. Pan (Green Pointer) - **Trigger + Grip + Move**
 
 **Purpose:** Slide the terrain across the table surface
 
 **How to Use:**
 1. Point controller at terrain
-2. **Hold Grip (middle trigger)**
-3. **Move controller** left/right/forward/back
-4. Terrain follows your hand movement
-5. Release grip to stop panning
+2. **Hold Index Trigger + Middle Grip** together
+3. **Move controller** in any direction
+4. Terrain follows your hand movement (stays on surface)
+5. Release both to stop panning
 
-**Key Features:**
-- Movement constrained to surface plane (stays on table)
-- 1:1 controller-to-terrain movement mapping
-- Limit: 5 units from anchor point
-
-**UX Benefit:** Feels like physically dragging the map across a table
+**Fingers Used:** Index + Middle
+**Ergonomics:** ⭐⭐⭐⭐⭐ Excellent - two finger squeeze + move
 
 ---
 
@@ -95,17 +108,13 @@
 **How to Use:**
 1. Point controller at desired rotation center
 2. **Hold Index Trigger**
-3. **Push Thumbstick LEFT** or **RIGHT**:
+3. **Push Thumbstick LEFT** or **RIGHT** with thumb:
    - **LEFT** (←) → Rotate counter-clockwise
    - **RIGHT** (→) → Rotate clockwise
 4. Release trigger or center thumbstick to stop
 
-**Key Features:**
-- Rotation axis passes through pointer hit point
-- Vertical axis only (perpendicular to table)
-- Speed controlled by how far you push thumbstick
-
-**UX Benefit:** Easy to control rotation speed, no need to twist wrist
+**Fingers Used:** Index + Thumb
+**Ergonomics:** ⭐⭐⭐⭐⭐ Perfect - comfortable two-finger combo
 
 ---
 
@@ -115,21 +124,38 @@
 
 **How to Use:**
 1. Point controller at desired marker location on terrain
-2. **Press Button A** once
+2. **Press Button A** once (standalone, no trigger)
 3. Red marker pin appears instantly
 4. Marker has auto-numbered label: "Pin 1", "Pin 2", etc.
 
 **Undo:**
-- **Press Button B** to remove the last placed marker
+- **Press Button B** (standalone, no trigger) to remove last marker
 - Can undo multiple times
 
-**Key Features:**
-- Instant placement (no hold required)
-- Haptic feedback when placed
-- Maximum 50 markers per session
-- All markers visible to all users
+**Fingers Used:** Thumb only (single button)
+**Ergonomics:** ⭐⭐⭐⭐⭐ Perfect - instant one-button action
 
-**UX Benefit:** Quick one-button placement, easy undo
+---
+
+### 5. Reanchor (Magenta Pointer) - **Trigger + Button B (hold 2s)**
+
+**Purpose:** Move terrain to a different table/surface
+
+**How to Use:**
+1. Point controller at desired new surface (different table, floor, etc.)
+2. **Hold Index Trigger + Button B** together for 2 seconds
+3. Watch pointer ray fade **white → magenta** (progress indicator)
+4. **When fully magenta**, terrain instantly moves to new location
+5. Strong haptic vibration confirms
+
+**Fingers Used:** Index + Thumb (hold position)
+**Ergonomics:** ⭐⭐⭐⭐ Good - requires intentional hold (prevents accidents)
+
+**Use Cases:**
+- Initial table too small → Move to larger table
+- Better viewing angle → Move to different position
+- Switch between table and floor
+- Relocate between rooms
 
 ---
 
@@ -217,14 +243,22 @@ The system automatically switches:
 
 ## 🎨 Visual Feedback System
 
-### Pointer Ray Colors:
+### Teacher Pointer Ray (Visible to All Students):
 
-**Controller Mode:**
-- **Cyan:** Idle (not pressing anything)
-- **Blue:** Index Trigger pressed (Zoom mode)
-- **Green:** Grip pressed (Pan mode)
-- **Yellow:** Trigger + Thumbstick (Rotate mode)
-- **Red:** Button A pressed (Annotate mode)
+**What students see:** Teacher's pointer ray in real-time with color-coded actions
+
+**Pointer Colors:**
+- **Cyan:** Teacher pointing (idle - no action)
+- **Blue:** Teacher zooming (Trigger + Move)
+- **Green:** Teacher panning (Trigger + Grip + Move)
+- **Yellow:** Teacher rotating (Trigger + Thumbstick)
+- **Red:** Teacher placing marker (Button A)
+- **White→Magenta:** Teacher reanchoring (Trigger + B, progressing)
+
+**Action Labels (for students):**
+- Floating text above pointer: "Teacher: Zooming", "Teacher: Panning", etc.
+- Helps students understand what's happening
+- Appears only for remote students (not teacher)
 
 **Hand Gesture Mode:**
 - **Cyan:** Hands visible but no gesture
@@ -305,42 +339,37 @@ The system automatically switches:
 
 Teachers can move terrain to a different table/location:
 
-#### **Method 1: Controller Combo** (Always Available)
+#### **Controller Method** (Recommended)
 
-**Control:** Hold **Grip + A + B** buttons for 1.5 seconds
+**Control:** Hold **Trigger + Button B** for 2 seconds
 
 **How to Use:**
 1. Point controller at desired surface (different table, floor spot, etc.)
-2. **Hold Grip + Button A + Button B** simultaneously
-3. Watch pointer ray fade **white → magenta** (shows progress)
-4. **When fully magenta** (1.5 sec), terrain moves to pointed location
+2. **Hold Index Trigger + Button B** (just 2 fingers!)
+3. Watch pointer ray fade **white → magenta** (progress indicator)
+4. **When fully magenta** (2 sec), terrain moves to new location
 5. Strong haptic vibration confirms
 
-**Visual Feedback:**
-- Pointer ray changes: White → Magenta (progress indicator)
-- Progress bar shows in UI (if enabled)
-- Haptic pulse when complete
+**Fingers Used:** Index + Thumb
+**Ergonomics:** ⭐⭐⭐⭐ Good - comfortable 2-finger hold
 
-**Use Cases:**
-- Move from small table to larger table
-- Move from table to floor
-- Reposition for better viewing
-- Move between rooms
+**Visual Feedback:**
+- Pointer ray: White → Magenta (real-time progress)
+- Progress bar in UI (if enabled)
+- Strong haptic when complete
 
 ---
 
-#### **Method 2: UI Button** (If enabled)
+#### **UI Button Method** (Optional)
 
-**Control:** Click "Reanchor Terrain" button in UI
+**Control:** Click "Reanchor Terrain" button
 
 **How to Use:**
 1. Click **"Reanchor Terrain"** button (teacher UI panel)
-2. UI shows: "Point at surface and press Trigger"
-3. Point controller at desired surface
-4. Press **Trigger**
-5. Terrain moves there
+2. Point controller at desired surface
+3. Terrain moves there automatically
 
-**Easier for beginners but requires UI interaction**
+**Ergonomics:** ⭐⭐⭐⭐⭐ Easiest - no combos needed
 
 ---
 
